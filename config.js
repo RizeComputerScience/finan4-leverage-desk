@@ -263,7 +263,7 @@
         (t.id === 't2' ? `<br>The bad-year operating profit of ${m(t.B)} is ${t.decision === 'yes' ? 'at least' : 'less than'} the interest of ${m(P.int)}.` : ''); }
     if (t.id === 't3') { const a = `Plan A: ${m(t.B)} ÷ ${m(t.A.int)} = ${x1(t.A.bCov)}.`;
       return lvl === 1 ? a : `${a}<br>Plan B: ${m(t.B)} ÷ ${m(t.Bp.int)} = ${x1(t.Bp.bCov)}.<br>A plan passes if its coverage is at least ${COVER}.`; }
-    if (t.id === 't4') return lvl === 1 ? `Most interest: ${m(t.B)} ÷ ${COVER} = ${m(t.maxInt)} a year.` : `Largest loan: ${m(t.maxInt)} ÷ ${pc(t.r)} = ${m(t.answer)}. In the calculator: <code>${t.B}/${COVER}/${t.r}</code>.`;
+    if (t.id === 't4') return lvl === 1 ? `Most interest: ${m(t.B)} ÷ ${COVER} = ${m(t.maxInt)} a year.` : `Largest loan: ${m(t.maxInt)} ÷ ${pc(t.r)} = ${m(t.answer)}. In Desmos, two lines: <code>${t.B}/${COVER}</code>, then <code>ans/${t.r}</code>.`;
     if (t.id === 't5') return lvl === 1 ? `${m(t.C)} ÷ ${n0(t.N)} = ${m(t.d, 2)} a share.` : `Dividend: ${m(t.d, 2)}. Price after: ${m(t.P, 2)} − ${m(t.d, 2)} = ${m(t.px, 2)}.<br>Owner of 100 shares: 100 × ${m(t.px, 2)} + 100 × ${m(t.d, 2)} = ${m(t.owner, 2)}.`;
     if (t.id === 't6') return lvl === 1 ? `Shares bought back: ${m(t.C)} ÷ ${m(t.P, 2)} = ${n0(t.bought)}. Shares left: ${n0(t.N)} − ${n0(t.bought)} = ${n0(t.left)}.`
       : `EPS after: ${m(t.E)} ÷ ${n0(t.left)} = ${m(t.eps1, 2)}.<br>Each share is worth (${m(t.N * t.P)} − ${m(t.C)}) ÷ ${n0(t.left)} = ${m(t.P, 2)}, the same as before.`;
@@ -323,8 +323,8 @@
     app: 'finan4-u12-leverage-desk', version: 2, seedVersion: 2, salt: 'rize-finan4-u12-leverage:c41d07', points: 20,
     storageKey: 'rize-finan4-u12-leverage-v1', filePrefix: 'LeverageDesk',
     verifyUrl: 'https://rizecomputerscience.github.io/finan4-leverage-desk/verify.html',
-    calcPlaceholder: '(20000-6400)/20000*100',
-    calcHint: 'Type or tap. Use * to multiply and parentheses to group, so (20000-6400)/20000*100 is the food truck’s 68% owners’ return with a lot of debt.',
+    calcPlaceholder: '100*(20000-6400)/20000',
+    calcHint: 'Type or tap. Use * to multiply and parentheses to group, so 100*(20000-6400)/20000 is the food truck’s 68% owners’ return with a lot of debt.',
     story: { title: 'The Leverage Desk', kicker: 'Corporate Finance, Unit 12', company: 'Cragline Climbing', team: 'Finance Team',
       from: 'Pilar Zamora', fromTitle: 'chief financial officer, Cragline Climbing',
       dek: 'You have joined the finance team at Cragline Climbing, a chain of indoor climbing gyms. Pilar Zamora, the chief financial officer, has to tell the board how much to borrow for a group of new gyms, and later how to hand spare cash back to the owners.',
