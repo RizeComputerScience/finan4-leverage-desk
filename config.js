@@ -1,337 +1,286 @@
-/* The Leverage Desk: FINAN IV Unit 12 (debt, equity and payouts). Config for lib/coursedev/desk-engine.
-   Owners' return as debt rises in a good and a bad year, interest coverage, how much to borrow, and a dividend
-   against a buyback for the same cash. Worked example = the reading's food truck.
+/* The Leverage Desk: FINAN IV Unit 12 (debt and payouts). Config for lib/coursedev/desk-engine.
    Names swept for reuse 2026-11-04 (case_reuse.py): Cragline Climbing, Cragline, Pilar Zamora, Pilar, Zamora, all clean.
-   Rework 2026-11-06 (Samuel's Unit 10 review, design/course-principles.md; standards rules 17 to 23):
-   - Round seeds. The gyms cost a round $10M to $30M, the rate is 5, 8 or 10% (never the exam-style question's 7%, and the largest loan is whole dollars),
-     good- and bad-year profit are whole or half percents of the cost. Part 2 uses round share counts, prices that
-     divide the cash evenly, and dividends in half dollars.
-   - A 2 to 4 line worked `example` on every task, at 4% and on a $1,000,000 gym or a 2,000,000-share company, so it never
-     matches a task, the reading or the exam-style question.
-   - `parts` on Plan B (table, then the bad-year question), coverage (table, then which plans pass) and the buyback
-     (table, then what a share is worth).
-   - Every row names its cells; feedback quotes the student's own numbers; the engine's tolerance sentence is overridden.
-   - No step lacks a right answer, so none uses `autosave`. Every number is fictional, so there are no `sources`.
-   seedVersion and version moved to 2, so saved progress and receipts from v1 do not carry over. */
+   Version 3 (2026-11-12), rebuilt to the Unit 9 pattern (process/standards/interactive-assignments.md rules 25 to 39;
+   u12/TEACHING-MAP.md; design/scope-2026-11-11.md):
+   - The reading teaches; the desk has no walkthrough of its own (rule 32).
+   - Four calculations, each as a faded step then the student's own, on h.ladder: the owners' return in a good and a bad
+     year, the interest tax saving, interest coverage before and after a new loan, and the payout share against free cash flow.
+     Every task states the problem first, then shows a worked example drawn as the SAME table, read-only, with another
+     company and numbers (rule 29).
+   - Cut from the desk: the walkthrough, the largest loan for a coverage target, the dividend and the buyback tasks (EPS),
+     the dividends-or-buybacks check.
+   The previous version is in v2-archive/. seedVersion 3 and version 3: progress and receipts from v2 do not carry over. */
 (function (root) {
   'use strict';
   const QUIZ = [
-    { title: 'Quick win: borrowing to own more',
-      q: 'Buying stock with money borrowed from a broker and starting a business with a bank loan have the same effect on the owner’s return. What is it?',
-      options: ['Good years get better and bad years get worse', 'Every year gets better', 'The owner’s risk goes down', 'Nothing changes, because the loan is paid back'],
+    { title: 'Quick check: why the swing',
+      q: 'Plan B made the owners’ good year better and their bad year worse than Plan A. Why?',
+      options: ['The interest is due in good years and bad, so the owners keep every dollar above it and lose every dollar below it', 'The bank takes a bigger share of the profit in good years', 'Borrowed money always costs more than the owners’ money', 'The gyms earn less operating profit under Plan B'],
       answer: 0,
-      why: ['Right. The loan stays the same size whatever happens, so the owner keeps all the gain above the interest and takes all the loss below it.',
-        'Only good years get better. In a bad year the interest is still due, so the owner’s return falls further than it would with no loan.',
-        'Borrowing raises the owner’s risk. The owner’s return swings more widely, in both directions.',
-        'The interest is due every year, and the owner keeps every dollar of gain or loss on the borrowed money. That changes the owner’s return a lot.'] },
-    { title: 'Quick win: interest and taxes',
-      q: 'Cragline pays $400,000 of interest this year, and its tax rate is 25%. Interest comes off profit before tax is worked out. How much lower is Cragline’s tax bill because of the interest?',
-      options: ['$100,000', '$400,000', '$300,000', '$0'],
-      answer: 0,
-      why: ['Right. Every $100 of interest cuts a 25% tax bill by $25, so $400,000 of interest saves $100,000 of tax. That is one reason companies borrow.',
-        '$400,000 is the interest itself. The tax saving is the tax rate times the interest: 25% × $400,000.',
-        '$300,000 is what the interest costs Cragline after the tax saving. The saving itself is 25% × $400,000.',
-        'Interest is taken off before tax is worked out, so it does lower the tax bill: by 25% × $400,000.'] },
-    { title: 'Quick win: dividends and buybacks',
-      q: 'Cragline can hand cash back to its owners as a regular dividend or as a buyback. Which one is harder to cut back next year without upsetting investors?',
-      options: ['A regular dividend', 'A buyback', 'Both are equally hard to cut', 'Neither, because investors ignore both'],
-      answer: 0,
-      why: ['Right. Investors treat a regular dividend as a promise, so a cut reads as bad news. Buybacks can grow or stop from year to year.',
-        'Buybacks rise and fall from year to year, and investors expect that. A regular dividend is the one investors count on.',
-        'Investors count on a regular dividend in a way they do not count on a buyback, so cutting the dividend is harder.',
-        'Investors watch both closely. A regular dividend is the one they count on, so cutting it is harder.'] },
+      why: ['Right. The interest is the same whatever happens, so a bigger loan makes the owners’ return swing more in both directions.',
+        'A bank is paid a fixed amount of interest, not a share of the profit. That fixed payment is what makes the owners’ return swing.',
+        'In a good year the loan costs less than the gyms earn on it, which is why Plan B’s good year is better. The trouble is that the interest is due in bad years too.',
+        'The gyms earn the same operating profit under both plans. Only the interest and the owners’ money change.'] },
     { title: 'Exam-style question',
       q: 'A gym chain cost $5,000,000. It borrowed $3,000,000 at 7% interest, and its owners put in the other $2,000,000. In a bad year it earns $150,000 of operating profit. What is the owners’ return that year?',
       options: ['−3.0%', '3.0%', '7.5%', '−1.2%'],
       answer: 0,
-      why: ['Right. Interest is 7% × $3,000,000 = $210,000. The owners’ profit is $150,000 − $210,000 = −$60,000, and −$60,000 ÷ $2,000,000 = −3.0%. Questions on the exams look like this one.',
+      why: ['Right. Interest is $3,000,000 × 0.07 = $210,000. The owners’ profit is $150,000 − $210,000 = −$60,000, and −$60,000 ÷ $2,000,000 = −3.0%. Exam questions look like this one.',
         '3.0% divides the operating profit by the whole $5,000,000 and ignores the loan. Subtract the interest, then divide by the owners’ money.',
-        '7.5% divides the operating profit by the owners’ money but forgets the $210,000 of interest. Subtract it first.',
-        '−1.2% divides the owners’ loss by the whole $5,000,000. The owners only put in $2,000,000, so divide by that.'] },
+        '7.5% divides the operating profit by the owners’ money but leaves out the $210,000 of interest. Subtract it first.',
+        '−1.2% divides the owners’ loss by the whole $5,000,000. The owners put in only $2,000,000, so divide by that.'] },
   ];
 
   const STEPS = [
-    { id: 'walk', label: 'Worked example', kind: 'walk' },
-    { id: 'q1', label: 'Check 1', kind: 'check', quiz: 0 },
-    { id: 't1', label: 'A little debt', kind: 'task' },
-    { id: 't2', label: 'A lot of debt', kind: 'task' },
-    { id: 'q2', label: 'Check 2', kind: 'check', quiz: 1 },
-    { id: 't3', label: 'Interest coverage', kind: 'task' },
-    { id: 't4', label: 'How much to borrow', kind: 'task' },
-    { id: 'q3', label: 'Check 3', kind: 'check', quiz: 2 },
-    { id: 't5', label: 'A dividend', kind: 'task' },
-    { id: 't6', label: 'A buyback', kind: 'task' },
-    { id: 'q4', label: 'Exam-style question', kind: 'check', quiz: 3 },
+    { id: 'or1', label: 'A little debt', kind: 'task' },
+    { id: 'or2', label: 'A lot of debt', kind: 'task' },
+    { id: 'q1', label: 'Quick check', kind: 'check', quiz: 0 },
+    { id: 'tx1', label: 'Tax saving', kind: 'task' },
+    { id: 'tx2', label: 'Plan B’s tax saving', kind: 'task' },
+    { id: 'cv1', label: 'Coverage, Plan A', kind: 'task' },
+    { id: 'cv2', label: 'Coverage, Plan B', kind: 'task' },
+    { id: 'ps1', label: 'Last year’s payouts', kind: 'task' },
+    { id: 'ps2', label: 'Next year’s payouts', kind: 'task' },
+    { id: 'q2', label: 'Exam-style question', kind: 'check', quiz: 1 },
     { id: 'note', label: 'Your note', kind: 'note' },
   ];
-  const COVER = 2;   // the bank's minimum interest coverage in a bad year
+  const COVER = 2;   // the bank's minimum interest coverage after a new loan, in a bad year
 
-  // Round seed sets (the tests read these). Percents are of the gyms' cost.
+  // Round seed sets (the tests read these). gp and bp are good- and bad-year operating profit as a percent of the gyms' cost.
+  // c is coverage now; existing debt is half the gyms' cost, so Plan A's coverage after is 5c/7 and Plan B's is 5c/11.
   const ROUND = {
-    I: [10000000, 15000000, 20000000, 25000000, 30000000], r: [0.05, 0.08, 0.10],
-    gp: [12, 13, 14, 15, 16, 17, 18, 19, 20], bp: [2, 2.5, 3, 3.5, 4, 4.5, 5],
-    N: [1000000, 1500000, 2500000, 4000000, 5000000], P: [20, 25, 40, 50], d: [0.5, 1, 1.5, 2], eps0: [1, 1.5, 2, 2.5, 3],
+    I: [4000000, 5000000, 6000000, 8000000, 10000000], r: [0.05, 0.06, 0.08, 0.10], tax: [0.20, 0.21, 0.25],
+    gp: [12, 13, 14, 15, 16, 17, 18, 19, 20], bp: [2.5, 3, 3.5, 4, 4.5, 5], c: [3, 4, 5, 5.5, 6],
+    fcf: [1600000, 2000000, 2400000, 3000000, 4000000], capex: [1000000, 1500000, 2000000, 2500000],
+    s: [0.6, 0.7, 0.8, 1.25, 1.3, 1.4], divShare: [0.25, 0.4, 0.5],
   };
 
   function buildTasks(rng, h) {
-    const T = [];
-    // Part 1: the new gyms. Redraw until no answer sits on a knife edge (Plan B coverage of 0.5 makes a dropped
-    // minus sign look like a forgotten interest charge); the fallback is a valid draw.
-    let I = 20000000, r = 0.08, G = 3000000, B = 600000;
-    for (let tries = 0; tries < 200; tries++) {
-      const i = h.pick(rng, ROUND.I), rr = h.pick(rng, ROUND.r), g = i * h.pick(rng, ROUND.gp) / 100, b = i * h.pick(rng, ROUND.bp) / 100;
-      const cA = b / (0.2 * i * rr), cB = b / (0.6 * i * rr), aBad = (b - 0.2 * i * rr) / (0.8 * i);
-      if (Math.abs(cA - COVER) > 0.2 && Math.abs(cB - 1) > 0.08 && Math.abs(cB - 0.5) > 0.05 && Math.abs(aBad) > 0.008 && rr - b / i >= 0.01) { I = i; r = rr; G = g; B = b; break; } }
-    const D1 = 0.2 * I, D2 = 0.6 * I;
-    const plan = (D) => { const E = I - D, int = D * r; return { D, E, int, gRet: (G - int) / E, bRet: (B - int) / E, gCov: G / int, bCov: B / int }; };
-    const A = plan(D1), Bp = plan(D2), none = { gRet: G / I, bRet: B / I };
-    const base = { I, r, G, B, A, Bp, none };
-    T.push(Object.assign({ id: 't1', P: A }, base));
-    T.push(Object.assign({ id: 't2', P: Bp, decision: B >= Bp.int ? 'yes' : 'no' }, base));
-    const passA = A.bCov >= COVER, passB = Bp.bCov >= COVER;
-    T.push(Object.assign({ id: 't3', decision: passA && passB ? 'both' : passA ? 'onlyA' : passB ? 'onlyB' : 'neither' }, base));
-    const maxInt = B / COVER;
-    T.push(Object.assign({ id: 't4', maxInt, answer: maxInt / r }, base));
-    // Part 2: a year later, spare cash to hand back. The cash always buys a whole number of shares.
-    let N = 2500000, P = 40, d = 1, eps0 = 2;
-    for (let tries = 0; tries < 200; tries++) {
-      const n = h.pick(rng, ROUND.N), p = h.pick(rng, ROUND.P), dd = h.pick(rng, ROUND.d), e0 = h.pick(rng, ROUND.eps0);
-      const bought = n * dd / p, gap = e0 * n / (n - bought) - e0;
-      if (gap >= 0.03 && p / e0 >= 8 && p / e0 <= 40) { N = n; P = p; d = dd; eps0 = e0; break; } }
-    const C = N * d, E = N * eps0;
-    const part2 = { N, P, d, C, E, eps0 };
-    T.push(Object.assign({ id: 't5', px: P - d, owner: 100 * P }, base, part2));
-    const bought = C / P, left = N - bought;
-    T.push(Object.assign({ id: 't6', bought, left, eps1: E / left, decision: 'same' }, base, part2));
+    const T = [], P = (a) => h.pick(rng, a);
+    // Part 1: the new gyms. Plan A borrows 20% of the cost, Plan B 60%.
+    let I, r, gp, bp;
+    for (let k = 0; k < 200; k++) {
+      I = P(ROUND.I); r = P(ROUND.r); gp = P(ROUND.gp); bp = P(ROUND.bp);
+      const aBad = (bp / 100 - 0.2 * r) / 0.8, bBad = (bp / 100 - 0.6 * r) / 0.4;
+      // Plan A keeps a small profit in a bad year; Plan B is never near zero, nor the worked example's −2%
+      if (aBad >= 0.005 && Math.abs(bBad) >= 0.005 && Math.abs(bBad + 0.02) > 1e-9) break;
+    }
+    const G = I * gp / 100, B = I * bp / 100, LA = 0.2 * I, LB = 0.6 * I;
+    T.push({ id: 'or1', I, r, L: LA, own: I - LA, G, B, answer: (B - LA * r) / (I - LA) });
+    T.push({ id: 'or2', I, r, L: LB, own: I - LB, G, B, answer: (B - LB * r) / (I - LB) });
+    // Tax saving on each plan's interest
+    const tax = P(ROUND.tax);
+    T.push({ id: 'tx1', r, L: LA, tax, answer: LA * r * tax });
+    T.push({ id: 'tx2', r, L: LB, tax, answer: LB * r * tax });
+    // Coverage: Cragline already owes half the gyms' cost at the same rate; bad-year operating profit = c × interest now
+    const D0 = I / 2, c = P(ROUND.c), OI = c * D0 * r;
+    T.push({ id: 'cv1', r, D0, OI, L: LA, answer: OI / (D0 * r + LA * r) });
+    { const after = OI / (D0 * r + LB * r); T.push({ id: 'cv2', r, D0, OI, L: LB, answer: after, decision: after >= COVER ? 'yes' : 'no' }); }
+    // Payouts: last year (faded), then next year's plan (own). Payout share is exact by construction.
+    const pay = (id, notS) => {
+      let f, s; do { f = P(ROUND.fcf); s = P(ROUND.s); } while (s === notS);
+      const capex = P(ROUND.capex), ret = Math.round(f * s), div = Math.round(ret * P(ROUND.divShare) / 10000) * 10000;
+      return { id, cfo: f + capex, capex, div, buy: ret - div, answer: s, decision: s <= 1 ? 'yes' : 'no' };
+    };
+    const p1 = pay('ps1', null); T.push(p1); T.push(pay('ps2', p1.answer));
+    delete T[T.length - 2].decision;   // the faded step asks no question
     return T;
   }
 
-  const m = (x, dp) => root.DeskEngine.h.money(x, dp);
-  const n0 = (x) => Math.round(x).toLocaleString('en-US');
+  const m0 = (x) => root.DeskEngine.h.money(x);
   const pc = (x) => (Math.round(x * 1000) / 10) + '%';
-  const p1 = (x) => (x < 0 ? '−' : '') + (Math.round(Math.abs(x) * 1000) / 10).toFixed(1) + '%';
-  const p2 = (x) => (x < 0 ? '−' : '') + (Math.round(Math.abs(x) * 10000) / 100).toFixed(2) + '%';
-  const x1 = (x) => (Math.round(x * 100) / 100).toFixed(2);
-  const cell = (L, y, label, ph) => `<label class="sr-only" for="r${y}">${label}</label><input id="r${y}" class="rowin" data-row="${y}" inputmode="decimal" autocomplete="off"${ph ? ` placeholder="${ph}"` : ''} value="${(L.rows || [])[y] ? String(L.rows[y]).replace(/"/g, '') : ''}"><span class="mark" id="mk${y}"></span>`;
-  const kv = (rows, caption) => `<div class="tw"><table class="cf"><caption>${caption}</caption><tbody>${rows.map((x) => `<tr><td class="lbl">${x[0]}</td><td>${x[1]}</td></tr>`).join('')}</tbody></table></div>`;
+  const p2 = (x) => String(+(x * 100).toFixed(2)) + '%';
+  const dec = (x) => String(+x.toFixed(4));
+  const cv = (x) => String(+x.toFixed(2));
+  // A percent typed with a % sign means that percent. Without one, 17.25 and 0.1725 both mean 17.25%: take whichever reading is
+  // nearer the answer (every percent on this desk is between −20% and 150%, so the two readings never compete).
+  const pctIn = (h, s, target) => { const v = h.parseMoney(s); if (!isFinite(v) || /%/.test(String(s))) return v; return Math.abs(v - target) <= Math.abs(v / 100 - target) ? v : v / 100; };
+  const show = (l) => (l.fmt === 'pct' ? p2(l.value) : l.fmt === 'num' ? cv(l.value) : l.fmt === 'text' ? l.value : m0(l.value));
 
-  // Percentages: "23%", "23" and "23.0" all mean 23%. A bare decimal like 0.23 is read as 0.23% and gets a hint.
-  function judgePct(h, raw, exact, diag, opts) {
-    const s = String(raw == null ? '' : raw); const v = h.parseMoney(s); const frac = s.includes('%') ? v : v / 100;
-    const res = h.judgeNumber(frac, exact, diag || [], Object.assign({ tol: 0.0006, unreadable: 'Type a percentage, like 12.5%.' }, opts || {}));
-    if (!res.ok && isFinite(v) && !s.includes('%') && Math.abs(v - exact) <= 0.0006) return { ok: false, code: 'decimal', msg: `Type it as a percentage: ${s} as a decimal is ${p1(v)}.` };
-    return res;
+  /* Each table is a list of line specs. calc(ref) builds the Calculation cell; ref(i, word) shows line i's result when that line
+     is given, or the word when the student fills it in. mode: 'ex' (worked example, every line filled), 'faded' (only the lines
+     in `blanks` are inputs), 'own' (every line an input). The worked example uses the same function on other numbers. */
+  function table(specs, mode, blanks) {
+    const isIn = (i) => mode === 'own' || (mode === 'faded' && blanks.includes(i));
+    const ref = (i, word) => (isIn(i) ? word : show(specs[i]));
+    return specs.map((s, i) => {
+      const l = { label: s.label, calc: s.calc(ref), value: s.value, fmt: s.fmt, input: isIn(i) };
+      return l.input ? l : { label: l.label, calc: l.calc, value: show(l), fmt: 'text', input: false };
+    });
   }
-  const judgeX = (h, raw, exact, diag, otherMsg) => h.judgeNumber(h.parseMoney(String(raw == null ? '' : raw).replace(/x$/i, '')), exact, diag, { tol: 0.006, unreadable: 'Type a number of times, like 2.5.', otherMsg });
+  const SPEC = {
+    or: (L, r, own, G, B) => { const i = L * r; return [
+      { label: 'Interest', value: i, fmt: 'money', calc: () => `${m0(L)} × ${dec(r)}` },
+      { label: 'Owners’ profit, good year', value: G - i, fmt: 'money', calc: (f) => `${m0(G)} − ${f(0, 'interest')}` },
+      { label: 'Owners’ return, good year', value: (G - i) / own, fmt: 'pct', calc: (f) => `${f(1, 'good-year profit')} ÷ ${m0(own)}` },
+      { label: 'Owners’ profit, bad year', value: B - i, fmt: 'money', calc: (f) => `${m0(B)} − ${f(0, 'interest')}` },
+      { label: 'Owners’ return, bad year', value: (B - i) / own, fmt: 'pct', calc: (f) => `${f(3, 'bad-year profit')} ÷ ${m0(own)}` }]; },
+    tx: (L, r, tax) => { const i = L * r; return [
+      { label: 'Interest', value: i, fmt: 'money', calc: () => `${m0(L)} × ${dec(r)}` },
+      { label: 'Interest tax saving', value: i * tax, fmt: 'money', calc: (f) => `${f(0, 'interest')} × ${dec(tax)}` },
+      { label: 'Interest after the tax saving', value: i * (1 - tax), fmt: 'money', calc: (f) => `${f(0, 'interest')} − ${f(1, 'tax saving')}` }]; },
+    cv: (D0, r, OI, L) => { const i0 = D0 * r, x = L * r; return [
+      { label: 'Interest now', value: i0, fmt: 'money', calc: () => `${m0(D0)} × ${dec(r)}` },
+      { label: 'Coverage now', value: OI / i0, fmt: 'num', calc: (f) => `${m0(OI)} ÷ ${f(0, 'interest now')}` },
+      { label: 'Extra interest', value: x, fmt: 'money', calc: () => `${m0(L)} × ${dec(r)}` },
+      { label: 'Coverage after the new loan', value: OI / (i0 + x), fmt: 'num', calc: (f) => `${m0(OI)} ÷ (${f(0, 'interest now')} + ${f(2, 'extra interest')})` }]; },
+    ps: (cfo, capex, div, buy) => { const f0 = cfo - capex, ret = div + buy; return [
+      { label: 'Free cash flow', value: f0, fmt: 'money', calc: () => `${m0(cfo)} − ${m0(capex)}` },
+      { label: 'Cash returned to owners', value: ret, fmt: 'money', calc: () => `${m0(div)} + ${m0(buy)}` },
+      { label: 'Payout share', value: ret / f0, fmt: 'pct', calc: (f) => `${f(1, 'cash returned')} ÷ ${f(0, 'free cash flow')}` },
+      { label: 'Cash left after payouts', value: f0 - ret, fmt: 'money', calc: (f) => `${f(0, 'free cash flow')} − ${f(1, 'cash returned')}` }]; },
+  };
+  const FADED = { or1: [3, 4], tx1: [1, 2], cv1: [2, 3], ps1: [2, 3] };
+  function linesFor(t) {
+    const mode = FADED[t.id] ? 'faded' : 'own', b = FADED[t.id];
+    if (/^or/.test(t.id)) return table(SPEC.or(t.L, t.r, t.own, t.G, t.B), mode, b);
+    if (/^tx/.test(t.id)) return table(SPEC.tx(t.L, t.r, t.tax), mode, b);
+    if (/^cv/.test(t.id)) return table(SPEC.cv(t.D0, t.r, t.OI, t.L), mode, b);
+    if (/^ps/.test(t.id)) return table(SPEC.ps(t.cfo, t.capex, t.div, t.buy), mode, b);
+  }
+  // Worked examples: every rate is 4%, which no task uses. Built on first use (money() is not loaded with this file).
+  const EXAMPLES = () => ({
+    or1: { cap: 'A bowling chain’s new alleys cost $1,000,000. It borrows $200,000 at 4%, and its owners put in $800,000. Good year $160,000, bad year $24,000.',
+      lines: table(SPEC.or(200000, 0.04, 800000, 160000, 24000), 'ex') },
+    or2: { cap: 'The same bowling chain borrows $600,000 at 4% instead, and its owners put in $400,000. Good year $160,000, bad year $16,000.',
+      lines: table(SPEC.or(600000, 0.04, 400000, 160000, 16000), 'ex'),
+      after: 'The bigger loan lifts the good year from 19% to 34% and turns the bad year into a loss.' },
+    tx1: { cap: 'A bowling chain borrows $500,000 at 4%. Its tax rate is 25%.', lines: table(SPEC.tx(500000, 0.04, 0.25), 'ex') },
+    tx2: { cap: 'A trampoline park borrows $800,000 at 4%. Its tax rate is 30%.', lines: table(SPEC.tx(800000, 0.04, 0.30), 'ex') },
+    cv1: { cap: 'A bowling chain owes $500,000 at 4% and earns $90,000 of operating profit in a bad year. It borrows $250,000 more.',
+      lines: table(SPEC.cv(500000, 0.04, 90000, 250000), 'ex'), after: 'Coverage after the loan is 3, above the bank’s 2, so the bank would lend.' },
+    cv2: { cap: 'A trampoline park owes $500,000 at 4% and earns $70,000 of operating profit in a bad year. It asks for $1,000,000 more.',
+      lines: table(SPEC.cv(500000, 0.04, 70000, 1000000), 'ex'), after: 'Coverage after the loan is 1.17, below 2, so the bank would say no.' },
+    ps1: { cap: 'A bowling chain made $900,000 of cash from operations and spent $300,000 on new lanes. It paid $150,000 of dividends and bought back $300,000 of shares.',
+      lines: table(SPEC.ps(900000, 300000, 150000, 300000), 'ex') },
+    ps2: { cap: 'A trampoline park expects $1,000,000 of cash from operations and $600,000 of capital spending. It plans $150,000 of dividends and $450,000 of buybacks.',
+      lines: table(SPEC.ps(1000000, 600000, 150000, 450000), 'ex'),
+      after: 'At 150%, the park would hand back more than it brings in, so it would have to borrow or spend its savings.' },
+  });
 
-  const facts = (t) => kv([['Cost of the new gyms, paid today', m(t.I)], ['Interest rate on the bank loan', pc(t.r)], ['Operating profit in a good year', m(t.G)], ['Operating profit in a bad year', m(t.B)]], 'Cragline’s new gyms');
-  const planTable = (L, cap) => `<div class="tw"><table class="cf"><caption>${cap}</caption><thead><tr><th scope="col" style="text-align:left">Line</th><th scope="col">Amount</th></tr></thead><tbody>
-    <tr><td class="lbl">Interest a year (loan × interest rate)</td><td>${cell(L, 1, 'Interest a year', '$0')}</td></tr>
-    <tr><td class="lbl">Owners’ money (cost − loan)</td><td>${cell(L, 2, 'Owners’ money', '$0')}</td></tr>
-    <tr><td class="lbl">Owners’ return in a good year: (good-year operating profit − interest) ÷ owners’ money</td><td>${cell(L, 3, 'Owners’ return in a good year', '0.0%')}</td></tr>
-    <tr class="total hl"><td class="lbl">Owners’ return in a bad year: (bad-year operating profit − interest) ÷ owners’ money</td><td>${cell(L, 4, 'Owners’ return in a bad year', '0.0%')}</td></tr></tbody></table></div>
-    <p class="small">Type the returns as percentages, like 12.5%. Start a loss with a minus sign.</p>`;
+  const PROBLEM = {
+    or1: (t) => ({ title: 'Plan A: a little debt', place: 'Pilar wants to know what the owners earn if Cragline borrows a little for the new gyms.',
+      body: `<p>Plan A borrows <b>${m0(t.L)}</b> at <b>${pc(t.r)}</b>, and the owners put in <b>${m0(t.own)}</b>. The gyms earn <b>${m0(t.G)}</b> of operating profit in a good year and <b>${m0(t.B)}</b> in a bad one. What do the owners earn in a bad year? The good year is filled in.</p>` }),
+    or2: (t) => ({ title: 'Plan B: a lot of debt', place: 'Now Pilar wants the same numbers if Cragline borrows a lot.',
+      body: `<p>Plan B borrows <b>${m0(t.L)}</b> at <b>${pc(t.r)}</b>, and the owners put in <b>${m0(t.own)}</b>. The gyms earn the same <b>${m0(t.G)}</b> in a good year and <b>${m0(t.B)}</b> in a bad one. What do the owners earn in each year?</p>` }),
+    tx1: (t) => ({ title: 'Interest lowers the tax bill', place: 'Pilar wants to know what Plan A’s interest really costs once taxes count.',
+      body: `<p>Plan A borrows <b>${m0(t.L)}</b> at <b>${pc(t.r)}</b>. Cragline’s tax rate is <b>${pc(t.tax)}</b>. How much tax does the interest save, and what does the interest cost after the saving? The interest is filled in.</p>` }),
+    tx2: (t) => ({ title: 'Plan B’s tax saving', place: 'Now the same question for Plan B.',
+      body: `<p>Plan B borrows <b>${m0(t.L)}</b> at <b>${pc(t.r)}</b>, and the tax rate is still <b>${pc(t.tax)}</b>. What are the interest, the tax saving and the interest after the saving?</p>` }),
+    cv1: (t) => ({ title: 'Will the bank lend for Plan A?', place: 'Cragline’s bank lends only if interest coverage stays at 2 or more in a bad year.',
+      body: `<p>Cragline already owes <b>${m0(t.D0)}</b> at <b>${pc(t.r)}</b>. In a bad year, the gyms it runs today earn <b>${m0(t.OI)}</b> of operating profit. Plan A borrows <b>${m0(t.L)}</b> more at the same rate. What is the coverage after the loan? The first two lines are filled in.</p>` }),
+    cv2: (t) => ({ title: 'Will the bank lend for Plan B?', place: 'The bank runs the same check on Plan B.',
+      body: `<p>Plan B borrows <b>${m0(t.L)}</b> instead, at the same <b>${pc(t.r)}</b>. Cragline still owes <b>${m0(t.D0)}</b>, and its gyms still earn <b>${m0(t.OI)}</b> in a bad year. What is the coverage before and after the loan?</p>`,
+      choice: { legend: 'The bank wants coverage of at least 2 after the loan. Would it lend for Plan B?', options: [['yes', 'Yes: coverage after the loan is 2 or more'], ['no', 'No: coverage after the loan is below 2']] } }),
+    ps1: (t) => ({ title: 'Cash handed back last year', place: 'The board also asks how much cash Cragline hands back to its owners.',
+      body: `<p>Last year Cragline made <b>${m0(t.cfo)}</b> of cash from operations and spent <b>${m0(t.capex)}</b> on gyms and equipment. It paid <b>${m0(t.div)}</b> of dividends and bought back <b>${m0(t.buy)}</b> of its shares. What was its payout share? The first two lines are filled in.</p>` }),
+    ps2: (t) => ({ title: 'Next year’s payout plan', place: 'The board has a payout plan for next year and wants to know if Cragline can afford it.',
+      body: `<p>Next year Cragline expects <b>${m0(t.cfo)}</b> of cash from operations and <b>${m0(t.capex)}</b> of capital spending. The board plans <b>${m0(t.div)}</b> of dividends and <b>${m0(t.buy)}</b> of buybacks. What payout share does that plan mean?</p>`,
+      choice: { legend: 'Can Cragline pay for this plan from its own cash, without borrowing?', options: [['yes', 'Yes: the payout share is 100% or less'], ['no', 'No: the payout share is above 100%']] } }),
+  };
 
   function taskView(t, L, h) {
-    if (t.id === 't1') return { title: 'Plan A: a little debt', place: 'Cragline is opening a group of new gyms, and the board must decide how to pay for them.',
-      body: `<p>Plan A borrows <b>${m(t.P.D)}</b> from the bank. The owners put in the rest. Ignore taxes in this desk.</p>${facts(t)}`,
-      example: `<p>A $1,000,000 gym borrows $200,000 at 4%. Interest = $200,000 × 4% = $8,000 a year.</p>
-        <p>Owners’ money = $1,000,000 − $200,000 = $800,000.</p>
-        <p>Good year, $128,000 of operating profit: ($128,000 − $8,000) ÷ $800,000 = 15.0%.</p>
-        <p>Bad year, $24,000 of operating profit: ($24,000 − $8,000) ÷ $800,000 = 2.0%.</p>`,
-      table: planTable(L, `Plan A: borrow ${m(t.P.D)}`),
-      helpLabels: ['Show me the interest and owners’ money', 'Show me every row'] };
-    if (t.id === 't2') return { title: 'Plan B: a lot of debt', place: 'One board member wants to borrow most of the money and keep the owners’ stake small.',
-      body: `<p>Plan B borrows <b>${m(t.P.D)}</b> from the bank. The owners put in the rest.</p>${facts(t)}`,
-      example: `<p>A $1,000,000 gym borrows $600,000 at 4%. Interest = $600,000 × 4% = $24,000 a year.</p>
-        <p>Owners’ money = $1,000,000 − $600,000 = $400,000.</p>
-        <p>Bad year, $16,000 of operating profit: ($16,000 − $24,000) ÷ $400,000 = −2.0%.</p>
-        <p>$16,000 is less than the $24,000 of interest, so operating profit does not cover the interest.</p>`,
-      parts: [{ html: '', field: 'table' }, { html: '', field: 'choice' }],
-      table: planTable(L, `1. Plan B: borrow ${m(t.P.D)}`),
-      choice: { legend: `2. In a bad year Cragline earns ${m(t.B)} of operating profit. Does that cover Plan B’s interest?`, options: [['yes', 'Yes, operating profit is at least the interest'], ['no', 'No, the interest is more than the operating profit']] },
-      helpLabels: ['Show me the interest and owners’ money', 'Show me every row'] };
-    if (t.id === 't3') return { title: 'What the bank checks', place: 'Before it lends, Cragline’s bank asks how many times operating profit covers the interest.',
-      body: `<p><b>Interest coverage</b> = operating profit ÷ interest. The bank looks at a bad year, because the interest is due either way, and wants coverage of at least <b>${COVER}</b>.</p>
-        <div class="tw"><table class="cf"><caption>What you know from Plans A and B</caption><thead><tr><th scope="col" style="text-align:left">Line</th><th scope="col">Plan A</th><th scope="col">Plan B</th></tr></thead><tbody>
-        <tr><td class="lbl">Bank loan</td><td>${m(t.A.D)}</td><td>${m(t.Bp.D)}</td></tr><tr><td class="lbl">Interest a year</td><td>${m(t.A.int)}</td><td>${m(t.Bp.int)}</td></tr>
-        <tr><td class="lbl">Operating profit in a bad year</td><td>${m(t.B)}</td><td>${m(t.B)}</td></tr></tbody></table></div>`,
-      example: `<p>A gym earns $80,000 of operating profit in a bad year, and its bank wants coverage of at least 2.</p>
-        <p>With $20,000 of interest: $80,000 ÷ $20,000 = 4.00. That is at least 2, so it passes.</p>
-        <p>With $50,000 of interest: $80,000 ÷ $50,000 = 1.60. That is below 2, so it fails.</p>`,
-      parts: [{ html: '', field: 'table' }, { html: '', field: 'choice' }],
-      table: `<div class="tw"><table class="cf"><caption>1. Interest coverage in a bad year, to two decimal places</caption><thead><tr><th scope="col" style="text-align:left">Plan</th><th scope="col">Coverage (times)</th></tr></thead><tbody>
-        <tr><td class="lbl">Plan A (bad-year operating profit ÷ Plan A interest)</td><td>${cell(L, 1, 'Plan A coverage in a bad year', '0.00')}</td></tr><tr><td class="lbl">Plan B (bad-year operating profit ÷ Plan B interest)</td><td>${cell(L, 2, 'Plan B coverage in a bad year', '0.00')}</td></tr></tbody></table></div>`,
-      choice: { legend: `2. Which plans give coverage of at least ${COVER} in a bad year?`, options: [['both', 'Both plans'], ['onlyA', 'Only Plan A'], ['onlyB', 'Only Plan B'], ['neither', 'Neither plan']] },
-      helpLabels: ['Show me Plan A', 'Show me both plans'] };
-    if (t.id === 't4') return { title: 'How much can Cragline borrow?', place: 'Pilar wants the largest loan the bank would still accept.',
-      body: kv([['Operating profit in a bad year', m(t.B)], ['Coverage the bank wants, at least', String(COVER)], ['Interest rate on the loan', pc(t.r)]], 'What the bank asks'),
-      example: `<p>A gym earns $80,000 in a bad year. Its bank wants coverage of 2 and charges 4%.</p>
-        <p>Most interest = $80,000 ÷ 2 = $40,000 a year.</p>
-        <p>Largest loan = $40,000 ÷ 4% = $1,000,000.</p>`,
-      value: { label: `The largest loan the bank would accept (bad-year operating profit ÷ ${COVER} ÷ interest rate)`, help: 'Round to the nearest dollar.' } };
-    if (t.id === 't5') return { title: 'Hand the cash back as a dividend', place: 'A year later the new gyms are open, and Cragline has spare cash it does not need.',
-      body: `<p>Cragline’s shares trade on the stock market. In a <b>dividend</b>, the cash is split evenly across every share, and once it leaves the company each share is worth that much less. Ignore taxes.</p>
-        ${kv([['Shares', n0(t.N)], ['Share price', m(t.P, 2)], ['Spare cash to hand back', m(t.C)]], 'Cragline today')}`,
-      example: `<p>A company has 2,000,000 shares at $30 and hands back $1,000,000.</p>
-        <p>Dividend per share = $1,000,000 ÷ 2,000,000 = $0.50.</p>
-        <p>Price after = $30.00 − $0.50 = $29.50.</p>
-        <p>An owner of 100 shares has 100 × $29.50 + 100 × $0.50 = $3,000.</p>`,
-      table: `<div class="tw"><table class="cf"><caption>A dividend of ${m(t.C)}</caption><thead><tr><th scope="col" style="text-align:left">Line</th><th scope="col">Amount</th></tr></thead><tbody>
-        <tr><td class="lbl">Dividend per share (cash ÷ shares)</td><td>${cell(L, 1, 'Dividend per share', '$0.00')}</td></tr>
-        <tr><td class="lbl">Share price right after the dividend (share price − dividend per share)</td><td>${cell(L, 2, 'Share price right after the dividend', '$0.00')}</td></tr>
-        <tr class="total hl"><td class="lbl">An owner of 100 shares now has (100 × price after + 100 × dividend per share)</td><td>${cell(L, 3, 'What an owner of 100 shares has', '$0')}</td></tr></tbody></table></div>`,
-      helpLabels: ['Show me the dividend per share', 'Show me every row'] };
-    if (t.id === 't6') return { title: 'Or hand it back as a buyback', place: 'A board member asks what happens if Cragline buys back shares with the same cash instead.',
-      body: `<p>In a <b>buyback</b>, Cragline uses the cash to buy its own shares from owners who want to sell. Ignore the interest the cash would have earned.</p>
-        ${kv([['Shares today', n0(t.N)], ['Share price', m(t.P, 2)], ['Cash spent on the buyback', m(t.C)], ['Earnings a year', m(t.E)], ['Earnings per share (EPS) today', m(t.eps0, 2)]], 'Cragline today')}`,
-      example: `<p>A company with 2,000,000 shares at $30 spends $1,200,000: $1,200,000 ÷ $30 = 40,000 shares bought back.</p>
-        <p>Shares left = 2,000,000 − 40,000 = 1,960,000.</p>
-        <p>EPS after = $4,900,000 of earnings ÷ 1,960,000 = $2.50.</p>`,
-      parts: [{ html: '', field: 'table' }, { html: '', field: 'choice' }],
-      table: `<div class="tw"><table class="cf"><caption>1. A buyback of ${m(t.C)}</caption><thead><tr><th scope="col" style="text-align:left">Line</th><th scope="col">Amount</th></tr></thead><tbody>
-        <tr><td class="lbl">Shares bought back (cash spent ÷ share price)</td><td>${cell(L, 1, 'Shares bought back', '0')}</td></tr>
-        <tr><td class="lbl">Shares left (shares today − shares bought back)</td><td>${cell(L, 2, 'Shares left', '0')}</td></tr>
-        <tr class="total hl"><td class="lbl">EPS after the buyback (earnings ÷ shares left)</td><td>${cell(L, 3, 'EPS after the buyback', '$0.00')}</td></tr></tbody></table></div>`,
-      choice: { legend: `2. After the buyback, what is each remaining share worth? The company is worth ${m(t.C)} less, and there are fewer shares.`, options: [['same', `About ${m(t.P, 2)}, the same as before`], ['more', `More than ${m(t.P, 2)}, because EPS went up`], ['less', `Less than ${m(t.P, 2)}, because the cash is gone`]] },
-      helpLabels: ['Show me the shares', 'Show me every row'] };
+    const P = PROBLEM[t.id], E = EXAMPLES()[t.id], v = P(t), lines = linesFor(t);
+    const example = h.ladder(E.lines, { filled: true, caption: E.cap }) + (E.after ? `<p>${E.after}</p>` : '');
+    const table = h.ladder(lines, { rows: L.rows, caption: 'Your turn' })
+      + (lines.some((l) => l.input && l.fmt === 'pct') ? '<p class="small">Type a percentage like 4.5%. Start a negative number with a minus sign.</p>' : '');
+    const parts = [{ html: '', field: 'table' }];
+    if (v.choice) parts.push({ html: '', field: 'choice' });
+    return { title: v.title, place: v.place, body: v.body, example, table, parts, choice: v.choice,
+      helpLabels: ['Show me the first blank', 'Show me every line'] };
   }
 
+  // Common slips, per line, phrased with the student's own numbers.
+  function diagFor(t, l) {
+    const D = [], r = t.r, rr = dec(r || 0);
+    if (l.label === 'Interest' || l.label === 'Interest now' || l.label === 'Extra interest') {
+      const base = l.label === 'Interest now' ? t.D0 : t.L;
+      D.push([base * r * 100, 'whole', `Use the rate as a decimal: ${pc(r)} = ${rr}. ${m0(base)} × ${rr}.`]);
+      if (t.I) D.push([t.I * r, 'cost', `Charge interest only on the loan, ${m0(t.L)}, not on the gyms’ whole cost.`]);
+      if (t.own) D.push([t.own * r, 'own', `Charge interest on the loan, ${m0(t.L)}, not on the owners’ money.`]);
+      if (l.label === 'Extra interest') D.push([(t.D0 + t.L) * r, 'total', `That is all the interest after the loan. The extra interest is on the new loan alone: ${m0(t.L)} × ${rr}.`]);
+      if (l.label === 'Interest now') D.push([(t.D0 + t.L) * r, 'total', `That includes the new loan. Interest now is on what Cragline owes today: ${m0(t.D0)} × ${rr}.`]);
+    }
+    if (/^Owners’ profit/.test(l.label)) { const i = t.L * r, op = /good/.test(l.label) ? t.G : t.B;
+      D.push([op, 'noint', `Subtract the interest, ${m0(i)}, from ${m0(op)}.`], [op + i, 'plus', `Subtract the interest, don’t add it: ${m0(op)} − ${m0(i)}.`]);
+      if (/bad/.test(l.label)) D.push([t.G - i, 'good', `That uses the good year. In a bad year the gyms earn ${m0(t.B)}.`]); }
+    if (/^Owners’ return/.test(l.label)) { const i = t.L * r, op = /good/.test(l.label) ? t.G : t.B, prof = op - i;
+      D.push([prof / t.I, 'cost', `Divide by the owners’ money, ${m0(t.own)}, not by the whole cost.`], [op / t.own, 'noint', `Take the interest off first: (${m0(op)} − ${m0(i)}) ÷ ${m0(t.own)}.`],
+        [prof / t.L, 'loan', `Divide by the owners’ money, ${m0(t.own)}, not by the loan.`]); }
+    if (l.label === 'Interest tax saving') { const i = t.L * r;
+      D.push([i, 'int', `That is the interest itself. The saving is the interest × the tax rate: ${m0(i)} × ${dec(t.tax)}.`], [i * (1 - t.tax), 'after', `That is the interest after the saving. The saving itself is ${m0(i)} × ${dec(t.tax)}.`],
+        [i * t.tax * 100, 'whole', `Use the tax rate as a decimal: ${pc(t.tax)} = ${dec(t.tax)}.`]); }
+    if (l.label === 'Interest after the tax saving') { const i = t.L * r;
+      D.push([i * (1 + t.tax), 'plus', 'Subtract the tax saving from the interest, don’t add it.'], [i * t.tax, 'saving', `That is the saving. Take it off the interest: ${m0(i)} − ${m0(i * t.tax)}.`]); }
+    if (l.label === 'Coverage now') D.push([t.D0 * r / t.OI, 'flip', `Divide operating profit by interest: ${m0(t.OI)} ÷ ${m0(t.D0 * r)}.`]);
+    if (l.label === 'Coverage after the new loan') { const i0 = t.D0 * r, x = t.L * r;
+      D.push([t.OI / x, 'newonly', `Divide by all the interest after the loan, the interest now plus the extra: ${m0(t.OI)} ÷ (${m0(i0)} + ${m0(x)}).`],
+        [t.OI / i0, 'now', 'That is the coverage now. After the loan, add the extra interest to the interest now.'],
+        [(i0 + x) / t.OI, 'flip', `Divide operating profit by interest: ${m0(t.OI)} ÷ ${m0(i0 + x)}.`]); }
+    if (l.label === 'Free cash flow') D.push([t.cfo + t.capex, 'plus', 'Subtract capital spending from cash from operations, don’t add it.'], [t.cfo, 'cfo', `Take capital spending, ${m0(t.capex)}, off cash from operations.`]);
+    if (l.label === 'Cash returned to owners') D.push([t.div, 'div', `Add the buybacks, ${m0(t.buy)}, to the dividends.`], [t.buy, 'buy', `Add the dividends, ${m0(t.div)}, to the buybacks.`],
+      [Math.abs(t.buy - t.div), 'minus', 'Add dividends and buybacks together.']);
+    if (l.label === 'Payout share') { const f = t.cfo - t.capex, ret = t.div + t.buy;
+      D.push([f / ret, 'flip', `Divide cash returned by free cash flow: ${m0(ret)} ÷ ${m0(f)}.`], [ret / t.cfo, 'cfo', `Divide by free cash flow, ${m0(f)}, not by cash from operations.`]); }
+    return D;
+  }
+
+  const plain = (s) => String(s).replace(/<[^>]+>/g, '');
   function judgeTask(t, e, h) {
-    const rows = e.rows || []; const rr = [];
-    const firstBad = (names) => { const b = Object.keys(names).map(Number).find((y) => !rr[y].ok); return b ? { ok: false, rowRes: rr, msg: `${names[b]}: ${rr[b].msg}` } : null; };
-    if (t.id === 't1' || t.id === 't2') {
-      const P = t.P, intWay = `${m(P.D)} × ${pc(t.r)}`, eqWay = `${m(t.I)} − ${m(P.D)}`;
-      const gWay = `(${m(t.G)} − ${m(P.int)}) ÷ ${m(P.E)}`, bWay = `(${m(t.B)} − ${m(P.int)}) ÷ ${m(P.E)}`;
-      rr[1] = h.judgeNumber(h.parseMoney(rows[1]), P.int, [[P.D, 'loan', `That is the loan itself. Interest = loan × interest rate: ${intWay}.`],
-        [t.I * t.r, 'whole', `Charge interest on the ${m(P.D)} loan only, not on the whole ${m(t.I)}: ${intWay}.`],
-        [P.D * t.r * 100, 'pct', `Turn ${pc(t.r)} into ${t.r} before multiplying: ${m(P.D)} × ${t.r}.`]],
-        { minTol: 1, otherMsg: `${intWay}.` });
-      rr[2] = h.judgeNumber(h.parseMoney(rows[2]), P.E, [[P.D, 'loan', `That is the bank’s money. Owners’ money = cost − loan: ${eqWay}.`], [t.I, 'cost', `That is the whole cost. Subtract the loan: ${eqWay}.`]], { otherMsg: `${eqWay}.` });
-      rr[3] = judgePct(h, rows[3], P.gRet, [[t.G / P.E, 'noint', `Subtract the ${m(P.int)} of interest first: ${gWay}.`], [(t.G - P.int) / t.I, 'whole', `Divide by the owners’ ${m(P.E)}, not the whole ${m(t.I)}: ${gWay}.`],
-        [t.G / t.I, 'none', `That is the return with no loan at all, ${m(t.G)} ÷ ${m(t.I)}. With the loan: ${gWay}.`], [P.bRet, 'bad', `That uses the bad year. This row uses the good year: ${gWay}.`]],
-        { otherMsg: `${gWay}.` });
-      const sign = t.B < P.int ? `${m(t.B)} is less than the ${m(P.int)} of interest, so the owners lose money and the return starts with a minus sign` : `${m(t.B)} is more than the ${m(P.int)} of interest, so the return is above zero`;
-      rr[4] = judgePct(h, rows[4], P.bRet, [[t.B / P.E, 'noint', `Subtract the ${m(P.int)} of interest first: ${bWay}.`], [(t.B - P.int) / t.I, 'whole', `Divide by the owners’ ${m(P.E)}, not the whole ${m(t.I)}: ${bWay}.`],
-        [P.gRet, 'good', `That is the good year. Use the bad-year operating profit: ${bWay}.`], [t.B / t.I, 'none', `That is the return with no loan at all. With the loan: ${bWay}.`], [-P.bRet, 'sign', `Check the sign. ${sign}.`]],
-        { otherMsg: `${bWay}. It can be negative.` });
-      const bad = firstBad({ 1: 'Interest', 2: 'Owners’ money', 3: 'Good year', 4: 'Bad year' }); if (bad) return bad;
-      if (t.id === 't2' && e.choice !== t.decision) return { ok: false, rowRes: rr, msg: !e.choice ? 'Now answer question 2, about the bad year.' : `Question 2: compare the bad-year operating profit, ${m(t.B)}, with Plan B’s interest, ${m(P.int)}. Your bad-year return of ${p1(P.bRet)} is ${P.bRet < 0 ? 'below' : 'above'} zero for the same reason.` };
-      return { ok: true, rowRes: rr };
+    const lines = linesFor(t), rows = e.rows || [], rowRes = [];
+    lines.forEach((l, i) => {
+      if (!l.input) return;
+      const other = `${plain(l.calc)}.`;
+      const neg = l.value < 0 ? 'The owners lose money here, so the answer is negative. Start it with a minus sign.' : undefined;
+      const opts = l.fmt === 'pct' ? { tol: 0.0006, scale: Math.abs(l.value), unreadable: 'Type a percentage, like 4.5%.', closeMsg: 'Close. Keep two decimal places in the percentage.', otherMsg: other, signMsg: neg }
+        : l.fmt === 'num' ? { tol: 0.051, scale: 100, unreadable: 'Type the coverage as a number, like 2.5.', otherMsg: other }
+          : { tol: Math.max(1, 0.001 * Math.abs(l.value)), scale: Math.abs(l.value), otherMsg: other,
+            signMsg: l.label === 'Cash left after payouts' ? 'Free cash flow minus cash returned. When more cash goes out than came in, the answer is negative.' : neg };
+      const v = l.fmt === 'pct' ? pctIn(h, rows[i], l.value) : h.parseMoney(rows[i]);
+      rowRes[i] = h.judgeNumber(v, l.value, diagFor(t, l), opts);
+    });
+    const bad = rowRes.findIndex((x) => x && !x.ok);
+    if (bad >= 0) return { ok: false, rowRes, msg: `${plain(lines[bad].label)}: ${rowRes[bad].msg}` };
+    if (t.decision && e.choice !== t.decision) {
+      if (!e.choice) return { ok: false, rowRes, msg: 'Now answer the question under the table.' };
+      return { ok: false, rowRes, msg: t.id === 'cv2' ? `Compare your coverage after the loan, ${cv(t.answer)}, with the bank’s 2. Which is bigger?`
+        : `Compare your payout share, ${p2(t.answer)}, with 100%. Which is bigger?` };
     }
-    if (t.id === 't3') {
-      const aWay = `${m(t.B)} ÷ ${m(t.A.int)}`, bWay = `${m(t.B)} ÷ ${m(t.Bp.int)}`;
-      rr[1] = judgeX(h, rows[1], t.A.bCov, [[t.G / t.A.int, 'good', `That uses the good year, ${m(t.G)}. The bank checks the bad year: ${aWay}.`], [t.A.int / t.B, 'flip', `That is upside down. Divide the operating profit by the interest: ${aWay}.`],
-        [t.Bp.bCov, 'swap', `That is Plan B’s coverage. Plan A pays ${m(t.A.int)} of interest: ${aWay}.`]], `${aWay}.`);
-      rr[2] = judgeX(h, rows[2], t.Bp.bCov, [[t.G / t.Bp.int, 'good', `That uses the good year, ${m(t.G)}. The bank checks the bad year: ${bWay}.`], [t.Bp.int / t.B, 'flip', `That is upside down. Divide the operating profit by the interest: ${bWay}.`],
-        [t.A.bCov, 'swap', `That is Plan A’s coverage. Plan B pays ${m(t.Bp.int)} of interest: ${bWay}.`]], `${bWay}.`);
-      const bad = firstBad({ 1: 'Plan A', 2: 'Plan B' }); if (bad) return bad;
-      if (e.choice !== t.decision) return { ok: false, rowRes: rr, msg: !e.choice ? 'Now answer question 2: which plans would the bank accept?' : `Question 2: Plan A’s coverage is ${x1(t.A.bCov)} and Plan B’s is ${x1(t.Bp.bCov)}. A plan passes only if its coverage is ${COVER} or more.` };
-      return { ok: true, rowRes: rr };
-    }
-    if (t.id === 't4') {
-      const way = `${m(t.B)} ÷ ${COVER} ÷ ${pc(t.r)}`;
-      return h.judgeNumber(h.parseMoney(e.value), t.answer, [[t.G / COVER / t.r, 'good', `That uses the good year, ${m(t.G)}. The bank wants coverage of ${COVER} even in a bad year: ${way}.`],
-        [t.maxInt, 'int', `${m(t.maxInt)} is the most interest Cragline can pay. Turn it into a loan: ${m(t.maxInt)} ÷ ${pc(t.r)}.`], [t.B / t.r, 'cov1', `That loan gives coverage of only 1. Divide ${m(t.B)} by ${COVER} first: ${way}.`],
-        [t.B * COVER / t.r, 'mult', `Divide ${m(t.B)} by ${COVER}; do not multiply: ${way}.`], [t.maxInt / (t.r * 100), 'pct', `Divide by ${t.r}, not by ${Math.round(t.r * 100)}: ${m(t.maxInt)} ÷ ${t.r}.`]],
-        { otherMsg: `Most interest = ${m(t.B)} ÷ ${COVER} = ${m(t.maxInt)}. Largest loan = that ÷ ${pc(t.r)}.` });
-    }
-    if (t.id === 't5') {
-      const dWay = `${m(t.C)} ÷ ${n0(t.N)}`, pxWay = `${m(t.P, 2)} − ${m(t.d, 2)}`, oWay = `100 × ${m(t.px, 2)} + 100 × ${m(t.d, 2)}`;
-      rr[1] = h.judgeNumber(h.parseMoney(rows[1]), t.d, [[t.C, 'total', `That is the whole amount. Divide it by the number of shares: ${dWay}.`], [t.N / t.C, 'flip', `That is upside down. Divide the cash by the shares: ${dWay}.`]], { tol: 0.0051, otherMsg: `${dWay}.` });
-      rr[2] = h.judgeNumber(h.parseMoney(rows[2]), t.px, [[t.P, 'same', `The cash has left the company, so each share is worth less: ${pxWay}.`], [t.P + t.d, 'add', `Subtract the dividend per share; do not add it: ${pxWay}.`]], { tol: 0.0051, otherMsg: `${pxWay}.` });
-      rr[3] = h.judgeNumber(h.parseMoney(rows[3]), t.owner, [[100 * t.px, 'noCash', `That is the shares alone. Add the cash the owner received: ${oWay}.`], [100 * t.d, 'cashOnly', `That is the cash alone. Add the value of the 100 shares: ${oWay}.`],
-        [t.px + t.d, 'one', `That is for one share. The owner has 100: ${oWay}.`]], { tol: 0.5, otherMsg: `${oWay}.` });
-      return firstBad({ 1: 'Dividend per share', 2: 'Price after', 3: 'Owner of 100 shares' }) || { ok: true, rowRes: rr };
-    }
-    if (t.id === 't6') {
-      const tolS = { tol: Math.max(1, 0.001 * t.bought) };
-      const bWay = `${m(t.C)} ÷ ${m(t.P, 2)}`, lWay = `${n0(t.N)} − ${n0(t.bought)}`, eWay = `${m(t.E)} ÷ ${n0(t.left)}`;
-      rr[1] = h.judgeNumber(h.parseMoney(rows[1]), t.bought, [[t.C, 'cash', `That is the cash. Divide it by the share price to get shares: ${bWay}.`], [t.C / t.eps0, 'eps', `Divide by the share price, not by EPS: ${bWay}.`]], Object.assign({ otherMsg: `${bWay}.` }, tolS));
-      rr[2] = h.judgeNumber(h.parseMoney(rows[2]), t.left, [[t.N, 'none', `Subtract the shares bought back: ${lWay}.`], [t.N + t.bought, 'add', `Subtract the shares bought back; do not add them: ${lWay}.`]], Object.assign({ otherMsg: `${lWay}.` }, tolS));
-      rr[3] = h.judgeNumber(h.parseMoney(rows[3]), t.eps1, [[t.eps0, 'before', `That is EPS before the buyback. Divide the earnings by the shares left: ${eWay}.`], [t.E / t.bought, 'bought', `Divide by the shares left, not the shares bought back: ${eWay}.`]], { tol: 0.0051, otherMsg: `${eWay}.` });
-      const bad = firstBad({ 1: 'Shares bought back', 2: 'Shares left', 3: 'EPS after' }); if (bad) return bad;
-      if (e.choice !== t.decision) return { ok: false, rowRes: rr, msg: !e.choice ? 'Now answer question 2, about what each share is worth.' : `Question 2: the company is now worth ${m(t.N * t.P)} − ${m(t.C)} = ${m(t.N * t.P - t.C)}, spread over ${n0(t.left)} shares. Work out ${m(t.N * t.P - t.C)} ÷ ${n0(t.left)}. EPS went up, but the company shrank as well.` };
-      return { ok: true, rowRes: rr };
-    }
+    return { ok: true, rowRes };
   }
 
   function helpText(t, lvl) {
-    if (t.id === 't1' || t.id === 't2') { const P = t.P;
-      const one = `Interest: ${m(P.D)} × ${pc(t.r)} = ${m(P.int)}. Owners’ money: ${m(t.I)} − ${m(P.D)} = ${m(P.E)}.`;
-      return lvl === 1 ? one : `${one}<br>Good year: (${m(t.G)} − ${m(P.int)}) ÷ ${m(P.E)} = ${p1(P.gRet)}.<br>Bad year: (${m(t.B)} − ${m(P.int)}) ÷ ${m(P.E)} = ${p1(P.bRet)}.` +
-        (t.id === 't2' ? `<br>The bad-year operating profit of ${m(t.B)} is ${t.decision === 'yes' ? 'at least' : 'less than'} the interest of ${m(P.int)}.` : ''); }
-    if (t.id === 't3') { const a = `Plan A: ${m(t.B)} ÷ ${m(t.A.int)} = ${x1(t.A.bCov)}.`;
-      return lvl === 1 ? a : `${a}<br>Plan B: ${m(t.B)} ÷ ${m(t.Bp.int)} = ${x1(t.Bp.bCov)}.<br>A plan passes if its coverage is at least ${COVER}.`; }
-    if (t.id === 't4') return lvl === 1 ? `Most interest: ${m(t.B)} ÷ ${COVER} = ${m(t.maxInt)} a year.` : `Largest loan: ${m(t.maxInt)} ÷ ${pc(t.r)} = ${m(t.answer)}. In Desmos, two lines: <code>${t.B}/${COVER}</code>, then <code>ans/${t.r}</code>.`;
-    if (t.id === 't5') return lvl === 1 ? `${m(t.C)} ÷ ${n0(t.N)} = ${m(t.d, 2)} a share.` : `Dividend: ${m(t.d, 2)}. Price after: ${m(t.P, 2)} − ${m(t.d, 2)} = ${m(t.px, 2)}.<br>Owner of 100 shares: 100 × ${m(t.px, 2)} + 100 × ${m(t.d, 2)} = ${m(t.owner, 2)}.`;
-    if (t.id === 't6') return lvl === 1 ? `Shares bought back: ${m(t.C)} ÷ ${m(t.P, 2)} = ${n0(t.bought)}. Shares left: ${n0(t.N)} − ${n0(t.bought)} = ${n0(t.left)}.`
-      : `EPS after: ${m(t.E)} ÷ ${n0(t.left)} = ${m(t.eps1, 2)}.<br>Each share is worth (${m(t.N * t.P)} − ${m(t.C)}) ÷ ${n0(t.left)} = ${m(t.P, 2)}, the same as before.`;
-    return '';
+    const lines = linesFor(t), blanks = lines.filter((l) => l.input);
+    const say = (l) => `${l.label}: ${l.calc} = ${show(l)}`;
+    return lvl === 1 ? say(blanks[0]) : lines.map(say).join('<br>');
   }
   function praise(t) {
-    if (t.id === 't1') return `With a little debt the owners earn ${p1(t.A.gRet)} in a good year and ${p1(t.A.bRet)} in a bad one. With no loan at all they would earn ${p1(t.none.gRet)} and ${p1(t.none.bRet)}.`;
-    if (t.id === 't2') return `More debt widens the swing: ${p1(t.Bp.gRet)} in a good year, ${p1(t.Bp.bRet)} in a bad one. ${t.decision === 'no' ? 'In the bad year the interest is more than the gyms earn, so the owners have to find the cash elsewhere.' : 'Even so, the bad year leaves very little room before the interest is more than the gyms earn.'}`;
-    if (t.id === 't3') return `Plan A covers its interest ${x1(t.A.bCov)} times in a bad year and Plan B only ${x1(t.Bp.bCov)} times. ${t.decision === 'onlyA' ? 'The bank would lend for Plan A only.' : 'Neither plan meets the bank’s test, so Cragline would have to borrow less.'}`;
-    if (t.id === 't4') return `The bank would lend up to ${m(t.answer)}, ${t.answer > t.A.D ? 'more than Plan A borrows' : 'less than even Plan A borrows'} and well below Plan B’s ${m(t.Bp.D)}.`;
-    if (t.id === 't5') return `Each owner gets ${m(t.d, 2)} a share in cash, and each share is worth ${m(t.d, 2)} less. The owner of 100 shares has ${m(t.owner, 2)} either way.`;
-    if (t.id === 't6') return `EPS rises from ${m(t.eps0, 2)} to ${m(t.eps1, 2)}, but each share is still worth ${m(t.P, 2)}. The owners who sold got the cash; the rest own a slightly bigger slice of a smaller company.`;
+    const L = linesFor(t), v = (i) => (L[i].input ? show(L[i]) : L[i].value);
+    if (t.id === 'or1') return `With a little debt, the owners earn ${v(2)} in a good year and ${v(4)} in a bad one.`;
+    if (t.id === 'or2') return `With a lot of debt, the owners earn ${v(2)} in a good year and ${v(4)} in a bad one. The interest is due either way, so the swing is wider than Plan A’s.`;
+    if (t.id === 'tx1') return `The government pays ${pc(t.tax)} of Plan A’s interest, so the loan really costs ${v(2)} a year.`;
+    if (t.id === 'tx2') return `Plan B’s interest saves ${v(1)} of tax, so it really costs ${v(2)} a year.`;
+    if (t.id === 'cv1') return `After Plan A, a bad year’s profit still covers the interest ${v(3)} times, so the bank would lend.`;
+    if (t.id === 'cv2') return `After Plan B, a bad year’s profit covers the interest ${v(3)} times, ${t.decision === 'yes' ? 'so the bank would lend' : 'below the bank’s 2, so the bank would say no'}.`;
+    if (t.id === 'ps1') return `Cragline handed back ${v(2)} of its free cash flow last year${t.answer > 1 ? ', more than it brought in' : ''}.`;
+    if (t.id === 'ps2') return `The plan hands back ${v(2)} of free cash flow. ${t.decision === 'yes' ? 'Cragline can pay for it from its own cash.' : 'Cragline would have to borrow or spend its savings to pay for it.'}`;
   }
-  const pctStr = (x) => (Math.round(x * 10000) / 100).toString() + '%';
-  function selfAnswer(t) {
-    if (t.id === 't1' || t.id === 't2') return { rows: [null, String(Math.round(t.P.int)), String(Math.round(t.P.E)), pctStr(t.P.gRet), pctStr(t.P.bRet)], choice: t.decision || null };
-    if (t.id === 't3') return { rows: [null, x1(t.A.bCov), x1(t.Bp.bCov)], choice: t.decision };
-    if (t.id === 't4') return { value: String(Math.round(t.answer)) };
-    if (t.id === 't5') return { rows: [null, t.d.toFixed(2), t.px.toFixed(2), t.owner.toFixed(2)] };
-    if (t.id === 't6') return { rows: [null, String(Math.round(t.bought)), String(Math.round(t.left)), t.eps1.toFixed(2)], choice: 'same' };
-  }
-  function selfWrong(t) {
-    if (t.id === 't1' || t.id === 't2') { const a = selfAnswer(t); a.rows[3] = (100 * t.G / t.P.E).toFixed(1) + '%'; return a; }
-    if (t.id === 't3') return { rows: [null, x1(t.G / t.A.int), x1(t.Bp.bCov)], choice: t.decision };
-    if (t.id === 't4') return { value: String(Math.round(t.maxInt)) };
-    if (t.id === 't5') return { rows: [null, t.d.toFixed(2), t.P.toFixed(2), t.owner.toFixed(2)] };
-    if (t.id === 't6') { const a = selfAnswer(t); a.choice = 'more'; return a; }
-  }
-
-  const WALK = {
-    title: 'The food truck, with a little debt and a lot',
-    intro: '<p>The food truck from the reading cost <b>$100,000</b>. It earns <b>$20,000</b> of operating profit (profit before interest and taxes) in a good year and <b>$4,000</b> in a bad one. The bank charges <b>8%</b>.</p>',
-    render(stage) {
-      const head = '<thead><tr><th scope="col" style="text-align:left">Line</th><th scope="col">A little debt</th><th scope="col">A lot of debt</th></tr></thead>';
-      if (stage < 2) {
-        const rows = [['Bank loan', '$20,000', '$80,000', 0], ['Interest a year (loan × 8%)', '$1,600', '$6,400', 0], ['Owners’ money (cost − loan)', '$80,000', '$20,000', 0],
-          ['Owners’ return in a good year: ($20,000 − interest) ÷ owners’ money', '23.0%', '68.0%', 1], ['Owners’ return in a bad year: ($4,000 − interest) ÷ owners’ money', '3.0%', '−12.0%', 1]];
-        return `<div class="tw"><table class="cf"><caption>Owners’ return with each loan</caption>${head}<tbody>${rows.filter((r) => r[3] <= stage).map((r) => `<tr class="${r[3] === stage && stage ? 'reveal' : ''}"><td class="lbl">${r[0]}</td><td>${r[1]}</td><td class="${r[2][0] === '−' ? 'neg' : ''}">${r[2]}</td></tr>`).join('')}</tbody></table></div>`;
-      }
-      if (stage === 2) {
-        return `<div class="tw"><table class="cf"><caption>Interest coverage: operating profit ÷ interest</caption>${head}<tbody>
-          <tr><td class="lbl">Good year</td><td>$20,000 ÷ $1,600 = 12.50</td><td>$20,000 ÷ $6,400 = 3.13</td></tr>
-          <tr class="hl"><td class="lbl">Bad year</td><td>$4,000 ÷ $1,600 = 2.50</td><td class="neg">$4,000 ÷ $6,400 = 0.63</td></tr></tbody></table></div>`;
-      }
-      return `<div class="tw"><table class="cf"><caption>The largest loan with bad-year coverage of 2</caption><thead><tr><th scope="col" style="text-align:left">Line</th><th scope="col" style="text-align:left">Working</th><th scope="col">Result</th></tr></thead><tbody>
-        <tr><td class="lbl">Most interest the truck can pay</td><td class="lbl">$4,000 ÷ 2</td><td>$2,000</td></tr><tr class="hl"><td class="lbl">Largest loan</td><td class="lbl">$2,000 ÷ 8%</td><td>$25,000</td></tr></tbody></table></div>`;
-    },
-    stages: [
-      { t: 'Interest and the owners’ money', p: 'With a little debt the owners borrow $20,000, pay $1,600 of interest a year and put in $80,000 of their own. With a lot of debt they borrow $80,000, pay $6,400 a year and put in only $20,000.' },
-      { t: 'Good year and bad year', p: 'The interest is the same whether or not it rained. In a good year the heavily borrowed owners earn 68.0% on their money, against 23.0% with a little debt. In a bad year they lose 12.0%, because the truck earned $4,000 but owed the bank $6,400.' },
-      { t: 'Interest coverage', p: '<b>Interest coverage</b> is operating profit ÷ interest, the number of times the business could pay its interest. Lenders look hardest at the bad year. With a lot of debt the truck covers its interest only 0.63 times, so the owners have to find the rest of the payment themselves.' },
-      { t: 'How much to borrow', p: 'Suppose the bank wants coverage of at least 2 even in a bad year. The truck can then pay at most $4,000 ÷ 2 = $2,000 of interest, and at 8% that is a loan of $2,000 ÷ 0.08 = $25,000. Borrowing more than that leaves too little room for a bad year.' },
-    ],
-  };
+  const typed = (l, k) => (l.fmt === 'pct' ? p2(l.value * k) : l.fmt === 'num' ? cv(l.value * k) : String(Math.round(l.value * k)));
+  function selfAnswer(t) { const rows = []; linesFor(t).forEach((l, i) => { if (l.input) rows[i] = typed(l, 1); }); return { rows, choice: t.decision || null }; }
+  function selfWrong(t) { const rows = []; linesFor(t).forEach((l, i) => { if (l.input) rows[i] = typed(l, 1.3); }); return { rows, choice: t.decision || null }; }
 
   root.DESK = {
-    app: 'finan4-u12-leverage-desk', version: 2, seedVersion: 2, salt: 'rize-finan4-u12-leverage:c41d07', points: 20,
-    storageKey: 'rize-finan4-u12-leverage-v1', filePrefix: 'LeverageDesk',
+    app: 'finan4-u12-leverage-desk', version: 3, seedVersion: 3, salt: 'rize-finan4-u12-leverage:c41d07', points: 20,
+    storageKey: 'rize-finan4-u12-leverage-v3', filePrefix: 'LeverageDesk',
     verifyUrl: 'https://rizecomputerscience.github.io/finan4-leverage-desk/verify.html',
-    calcPlaceholder: '100*(20000-6400)/20000',
-    calcHint: 'Type or tap. Use * to multiply and parentheses to group, so 100*(20000-6400)/20000 is the food truck’s 68% owners’ return with a lot of debt.',
+    calcPlaceholder: '(150000-60000)/4000000',
     story: { title: 'The Leverage Desk', kicker: 'Corporate Finance, Unit 12', company: 'Cragline Climbing', team: 'Finance Team',
       from: 'Pilar Zamora', fromTitle: 'chief financial officer, Cragline Climbing',
-      dek: 'You have joined the finance team at Cragline Climbing, a chain of indoor climbing gyms. Pilar Zamora, the chief financial officer, has to tell the board how much to borrow for a group of new gyms, and later how to hand spare cash back to the owners.',
-      whatBox: '<b>Borrowing works like buying stock with borrowed money.</b> The owners keep more of a good year and lose more in a bad one, because the interest is due either way. Lenders check how many times profit covers the interest. When cash is left over, a dividend and a buyback are two ways to hand it back.',
-      stepsLine: 'There are twelve steps: a worked example, six problems with three one-question checks between them, one exam-style question, and a short note to Pilar.' },
-    steps: STEPS, quiz: QUIZ, walk: WALK, buildTasks, taskView, judgeTask, helpText, praise, selfAnswer, selfWrong, ROUND,
+      dek: 'Cragline Climbing, a chain of indoor climbing gyms, wants to open new gyms and also has cash to spare. Pilar Zamora, its chief financial officer, has to tell the board how much to borrow for the new gyms and how much cash to hand back to the owners. You run the numbers with her.',
+      whatBox: '',
+      stepsLine: 'Eleven short steps. Each shows a worked example in the same table you fill in, then you do the same calculation with your own numbers.' },
+    steps: STEPS, quiz: QUIZ, walk: null, buildTasks, taskView, judgeTask, helpText, praise, selfAnswer, selfWrong, ROUND, linesFor, EXAMPLES,
     note: { title: 'A note for the board', label: 'Your note to Pilar', minWords: 30, receiptHeading: 'Note to the chief financial officer',
-      prompt: 'The board votes next week. How much should Cragline borrow for the new gyms: Plan A, Plan B or a different amount? Use the bad-year coverage. Then say whether you would hand next year’s spare cash back as a dividend or a buyback, and give one reason.' },
+      prompt: 'The board votes next week. Should Cragline borrow for the new gyms with Plan A or Plan B? Use the owners’ bad-year return and the bank’s coverage check. Then say whether next year’s payout plan can go ahead, using its payout share.' },
   };
 })(typeof window !== 'undefined' ? window : globalThis);
